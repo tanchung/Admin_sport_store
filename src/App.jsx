@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
@@ -27,6 +27,11 @@ function AppContent() {
   const location = useLocation();
   const hideSidebar = location.pathname === "/login";
 
+  // Check if user is authenticated
+  const isAuthenticated = () => {
+    return !!localStorage.getItem("access_token") || !!localStorage.getItem("token");
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Ẩn Sidebar khi ở trang /login */}
@@ -34,6 +39,12 @@ function AppContent() {
 
       <div className="flex-1 overflow-y-auto">
         <Routes>
+          {/* Redirect root to login or home based on auth status */}
+          <Route 
+            path="/" 
+            element={isAuthenticated() ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} 
+          />
+          
           <Route path="/login" element={<LoginPage />} />
           <Route path="/home" element={<Home />} />
           <Route path="/orders" element={<Orders />} />
@@ -56,6 +67,9 @@ function AppContent() {
           <Route path="/edit-collection/:id" element={<EditCollection />} />
           <Route path="/voucher" element={<Voucher />} />
           <Route path="/edit-voucher" element={<EditVoucher />} />
+
+          {/* Catch all - redirect to login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
     </div>
